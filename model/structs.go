@@ -79,22 +79,42 @@ type ActivityStream struct {
 
 // Activity
 type Activity struct {
-	ID                uuid.UUID    `yaml:"id" gorm:"type:uuid;primaryKey"`
-	ActivityStreamID  uuid.UUID    `yaml:"stream" gorm:"type:uuid"`
-	MaturityLevelID   uuid.UUID    `yaml:"level" gorm:"type:uuid"`
-	Title             string       `yaml:"title"`
-	Benefit           string       `yaml:"benefit"`
-	ShortDescription  string       `yaml:"shortDescription"`
-	LongDescription   string       `yaml:"longDescription" gorm:"type:text"`
-	Results           StringArray  `yaml:"results" gorm:"type:text[]"`
-	Metrics           StringArray  `yaml:"metrics" gorm:"type:text[]"`
-	Costs             string       `yaml:"costs"`
-	Personnel         StringArray  `yaml:"personnel" gorm:"type:text[]"`
-	Notes             string       `yaml:"notes"`
-	RelatedActivities []*uuid.UUID `yaml:"relatedActivities" gorm:"type:uuid;many2many:related_activities;ForeignKey:id;References:id"`
-	Type              string       `yaml:"type"`
-	Questions         []Question   `gorm:"type:uuid;many2many:activity_questions;"`
+	ID                uuid.UUID         `yaml:"id" gorm:"type:uuid;primaryKey"`
+	ActivityStreamID  uuid.UUID         `yaml:"stream" gorm:"type:uuid"`
+	MaturityLevelID   uuid.UUID         `yaml:"level" gorm:"type:uuid"`
+	Title             string            `yaml:"title"`
+	Benefit           string            `yaml:"benefit"`
+	ShortDescription  string            `yaml:"shortDescription"`
+	LongDescription   string            `yaml:"longDescription" gorm:"type:text"`
+	Results           StringArray       `yaml:"results" gorm:"type:text[]"`
+	Metrics           StringArray       `yaml:"metrics" gorm:"type:text[]"`
+	Costs             string            `yaml:"costs"`
+	Personnel         StringArray       `yaml:"personnel" gorm:"type:text[]"`
+	Notes             string            `yaml:"notes"`
+	RelatedActivities []RelatedActivity `yaml:"relatedActivities" gorm:"many2many:linked_activities"`
+	Type              string            `yaml:"type"`
+	Questions         []Question        `gorm:"type:uuid;many2many:activity_questions;"`
 }
+
+type RelatedActivity struct {
+	ID uuid.UUID `yaml:"id" gorm:"type:uuid"`
+}
+
+// type User struct {
+// 	gorm.Model
+// 	Profiles []Profile `gorm:"many2many:user_profiles;foreignKey:Refer;joinForeignKey:UserReferID;References:UserRefer;JoinReferences:UserRefer"`
+// 	Refer    uint      `gorm:"index:,unique"`
+// }
+
+// type Profile struct {
+// 	gorm.Model
+// 	Name      string
+// 	UserRefer uint `gorm:"index:,unique"`
+// }
+
+// Which creates join table: user_profiles
+//   foreign key: user_refer_id, reference: users.refer
+//   foreign key: profile_refer, reference: profiles.user_refer
 
 // Question
 type Question struct {

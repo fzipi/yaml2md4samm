@@ -17,33 +17,15 @@ var (
 	DB *gorm.DB
 )
 
-func initialMigration(DB *gorm.DB) {
-	// Migrate the schema
-	// DB.AutoMigrate(&model.Model{},
-	// 	&model.BusinessFunction{},
-	// 	&model.SecurityPractice{},
-	// 	&model.PracticeLevel{},
-	// 	&model.MaturityLevel{},
-	// 	&model.ActivityStream{},
-	// 	&model.Activity{},
-	// 	&model.Question{})
-
-	DB.AutoMigrate(&model.Model{})
-	DB.AutoMigrate(&model.BusinessFunction{})
-	DB.AutoMigrate(&model.SecurityPractice{})
-	DB.AutoMigrate(&model.PracticeLevel{})
-	DB.AutoMigrate(&model.MaturityLevel{})
-	DB.AutoMigrate(&model.ActivityStream{})
-	DB.AutoMigrate(&model.Activity{})
-	DB.AutoMigrate(&model.Question{})
-}
-
 /* This is the relation between stuff in SAMM:
 
 model > function > practice > stream > activity > question
 */
 func main() {
 	var samm = model.Model{Version: 2.0, License: "CC-1.0", ExecutiveSummary: "Summary"}
+	allModels := []interface{}{&model.Model{}, &model.BusinessFunction{}, &model.SecurityPractice{},
+		&model.PracticeLevel{}, &model.MaturityLevel{}, &model.ActivityStream{}, &model.Activity{},
+		&model.RelatedActivity{}, &model.Question{}}
 
 	newLogger := logger.New(
 		log.New(os.Stdout, "\r\n", log.LstdFlags), // io writer
@@ -64,8 +46,14 @@ func main() {
 		panic("failed to create database samm.db")
 	}
 
+	if err = DB.Migrator().DropTable(allModels...); err != nil {
+		logrus.Fatalf("Failed to drop table, got error %v\n", err)
+	}
+
 	logrus.Print("Performing initial DB migration.")
-	initialMigration(DB)
+	if err = DB.AutoMigrate(allModels...); err != nil {
+		logrus.Fatalf("Failed to auto migrate, but got error %v\n", err)
+	}
 
 	logrus.Print("Parsing SAMM model.")
 	parsing.ParseFullModel(&samm, DB)
